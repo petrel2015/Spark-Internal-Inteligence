@@ -1,0 +1,19 @@
+[
+  {
+    "topic": "SPIP: The metrics & semantic modeling in Spark",
+    "motivation": "To bridge the semantic gap between business logic (metrics) and physical data schemas. Currently, metrics are often redefined across different tools/breakdowns, leading to inconsistency. Also, helping LLMs generate precise results by providing a clearer semantic layer.",
+    "key_design": "Proposes a semantic modeling layer within Spark. Key features include: 1) Define business metrics once and reuse across any dimension. 2) Semantic mapping to link logical names to physical columns. 3) Integration with Spark SQL to resolve logical queries into physical plans. Links to SPARK-54119.",
+    "impact_value": "Consistent business outcomes across the organization, simplified metric management, and enhanced AI/LLM readiness for data exploration.",
+    "links": [
+      {
+        "type": "JIRA",
+        "url": "https://issues.apache.org/jira/browse/SPARK-54119"
+      },
+      {
+        "type": "Google Doc",
+        "url": "https://docs.google.com/document/d/1xVTLijvDTJ90lZ_ujwzf9HvBJgWg0mY6cYM44Fcghl0"
+      }
+    ],
+    "summary": "This is a highly ambitious proposal that moves Spark beyond just a 'compute engine' into the realm of 'semantic engines'. By incorporating metric definitions directly into the engine, Spark can ensure that 'Revenue' means the same thing whether it's queried via SQL, Scala, or an LLM-based agent. This is a critical move for modern data stacks."
+  }
+]

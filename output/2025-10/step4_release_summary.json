@@ -1,0 +1,70 @@
+[
+  {
+    "software_version": "Apache Spark 4.1.0-preview3",
+    "key_updates": "Upcoming Spark 4.1.0-preview3 with compatibility for Java 17/21, Scala 2.13, and Python 3.10+. Emphasizes Spark Connect for remote connectivity and mentions deployment options like Standalone, YARN, and Kubernetes.",
+    "impact_value": "Enables wide-scale community testing of upcoming Spark 4.1 features; early access to Spark Connect improvements.",
+    "score": {
+      "value": 4,
+      "reason": "Major version preview (4.x) with significant infrastructure updates (Java 21, Spark Connect)."
+    },
+    "links": [
+      {
+        "type": "Official",
+        "url": "https://spark.apache.org/docs/4.1.0-preview3/"
+      },
+      {
+        "type": "Download",
+        "url": "https://dist.apache.org/repos/dist/release/spark/spark-4.1.0-preview3/"
+      }
+    ],
+    "summary": "This preview release is a critical milestone for the Spark 4.1 roadmap, focusing on modernizing the stack (Java 21) and maturing Spark Connect. As an architect, I see this as a strong signal towards a more decoupled, client-server future for Spark operations."
+  },
+  {
+    "software_version": "Apache Spark 3.5.7",
+    "key_updates": "Maintenance release focusing on security and correctness. Fixes include incorrect data type parsing [SPARK-52721], memory leaks [SPARK-52516], and data corruption with UDAFs [SPARK-52023]. Dependency upgrades: ORC 1.9.7, Jetty 9.4.58.",
+    "impact_value": "Improved stability and security for users on the 3.5 branch. Essential for production environments.",
+    "score": {
+      "value": 3,
+      "reason": "Standard maintenance release with critical bug and security fixes."
+    },
+    "links": [
+      {
+        "type": "Official",
+        "url": "https://spark.apache.org/releases/spark-release-3-5-7.html"
+      }
+    ],
+    "summary": "Spark 3.5.7 continues the tradition of the 3.5.x branch as the most stable 'enterprise-grade' choice. The fixes for UDAF corruption and memory leaks are particularly high-value for large-scale production deployments."
+  },
+  {
+    "software_version": "Apache Spark Kubernetes Operator 0.5.0",
+    "key_updates": "Expanded K8s support (v1.32-v1.34) and Spark versions (3.5, 4.0, 4.1). Introduced SparkApp and SparkCluster CRDs (v1), HPA for SparkCluster, and Artifact Hub integration. Enabled ExitOnOutOfMemoryError by default.",
+    "impact_value": "Better Kubernetes native experience, improved scalability with HPA, and enhanced operational safety.",
+    "score": {
+      "value": 4,
+      "reason": "Significant feature update including GA-level CRDs and autoscaling support."
+    },
+    "links": [
+      {
+        "type": "GitHub",
+        "url": "https://github.com/apache/spark-kubernetes-operator/releases/tag/0.5.0"
+      }
+    ],
+    "summary": "The 0.5.0 release of the K8s Operator is a major step towards making Kubernetes a first-class citizen for Spark. The introduction of HPA and V1 CRDs brings it closer to feature parity with traditional resource managers."
+  },
+  {
+    "software_version": "Apache Spark Connect Swift Client 0.4.0",
+    "key_updates": "Experimental release expanding API capabilities (Timestamp support, DataflowGraph, SqlGraphElements) and stability. Improved testing with Swift 6.2 and integration with Spark 3.5.7/4.1.0-preview2.",
+    "impact_value": "Enables iOS/macOS developers to interact with Spark clusters natively via Swift.",
+    "score": {
+      "value": 2,
+      "reason": "Experimental project with niche audience, but growing API coverage."
+    },
+    "links": [
+      {
+        "type": "GitHub",
+        "url": "https://github.com/apache/spark-connect-swift/releases/tag/0.4.0"
+      }
+    ],
+    "summary": "While still experimental, the Swift client's progress demonstrates the power of the Spark Connect protocol in enabling multi-language ecosystems beyond the traditional JVM/Python/R trio."
+  }
+]

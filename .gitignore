@@ -221,3 +221,5 @@ __marimo__/
 /.idea/Spark-Internal-Inteligence.iml
 /.idea/vcs.xml
 /.idea/workspace.xml
+/input/
+/output/

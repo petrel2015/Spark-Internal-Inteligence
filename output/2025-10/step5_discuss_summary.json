@@ -1,0 +1,86 @@
+[
+  {
+    "topic": "TypeError in spark-pipelines due to GeographyType",
+    "phenomenon": "Running spark-pipelines in the latest master with Python 3.9 (default on macOS) causes a TypeError due to modern Python type hinting syntax (int | str) in GeographyType.",
+    "pain_point": "Users on older Python versions (like default macOS Python 3.9) cannot run the latest Spark master code, even though PySpark officially requires 3.10+.",
+    "expectation": "Identify if this is a bug in the code or an environment configuration issue.",
+    "opinions": {
+      "Jacek Laskowski": "Reported the issue and suggested that GeographyType should be added to __all__ in pyspark/sql/types.py.",
+      "Ruifeng Zheng": "Confirmed that environment variables like PYSPARK_PYTHON need to be set correctly and agreed that GeographyType/GeometryType should be in __all__."
+    },
+    "score": {
+      "clarity": 5,
+      "difficulty": 2,
+      "interaction": 3,
+      "total": 10
+    },
+    "summary": "A typical environment mismatch issue. While Spark is moving towards modern Python (3.10+), the default system Python on some OSs (like macOS 12.x) can still cause friction. The consensus is to improve visibility of new spatial types in the public API."
+  },
+  {
+    "topic": "Different output precision of now() in Spark 3.5.1 between Java 8 and Java 21",
+    "phenomenon": "The now() function returns millisecond precision on Java 8 but microsecond precision on Java 21 in Spark 3.5.1.",
+    "pain_point": "Backward compatibility issues for systems storing timestamps as fixed-length strings, causing truncation or parsing errors when upgrading JVM.",
+    "expectation": "Clarify if this behavior is expected and if Spark should guarantee a fixed precision.",
+    "opinions": {
+      "Yu Hong": "Detailed the root cause in Instant.now() differences between JDK versions and sought community advice on whether this is a known issue."
+    },
+    "score": {
+      "clarity": 5,
+      "difficulty": 3,
+      "interaction": 1,
+      "total": 9
+    },
+    "summary": "This highlights a subtle but impactful side effect of upgrading to modern JVMs. While ISO-8601 allows variable precision, real-world legacy systems often rely on accidental stability. This might warrant a Spark configuration to 'cap' precision for compatibility."
+  },
+  {
+    "topic": "Unexpected behavior when using groupBy and count_distinct + percentile",
+    "phenomenon": "Spark adds an extra ObjectHashAggregate on both grouping key and distinct key when using count_distinct and percentile together, leading to a complex plan.",
+    "pain_point": "Performance degradation and confusion over the physical plan for what seems like a simple aggregation.",
+    "expectation": "Verify if the plan is correct or a potential bug.",
+    "opinions": {
+      "FengYu Cao": "Raised the question with a detailed reproduction and plan.",
+      "Herman van Hovell": "Explained that count_distinct triggers a multi-step aggregation to handle distinct values correctly."
+    },
+    "score": {
+      "clarity": 5,
+      "difficulty": 4,
+      "interaction": 3,
+      "total": 12
+    },
+    "summary": "A great deep-dive into Catalyst's aggregation rewriting logic. Multi-distinct or distinct+complex-agg (like percentile) often forces complex plans to avoid massive data shuffling of raw distinct values. It's a trade-off between memory and shuffle volume."
+  },
+  {
+    "topic": "Enhance JSON Parsing to Support Standard Compliance",
+    "phenomenon": "Spark's JSON parser (based on Hive compatibility) allows non-standard behaviors like single quotes and unescaped control characters.",
+    "pain_point": "Inconsistency with the JSON standard (RFC 8259) can lead to 'broken JSON' being accepted or produced, causing issues with external consumers.",
+    "expectation": "Introduce a config to allow users to enforce strict standard compliance.",
+    "opinions": {
+      "Philo": "Proposed the enhancement and provided specific examples of non-compliance.",
+      "Wenchen Fan": "Asked for a list of specific behaviors to be changed."
+    },
+    "score": {
+      "clarity": 4,
+      "difficulty": 3,
+      "interaction": 3,
+      "total": 10
+    },
+    "summary": "Spark is maturing from a 'compatible-at-all-costs' engine to one that values standards. This is a welcome change for enterprise integration, though 'strict mode' will likely remain optional for a long time to avoid breaking legacy pipelines."
+  },
+  {
+    "topic": "Improving query Performance by increasing spark.sql.parquet.pushdown.inFilterThreshold",
+    "phenomenon": "Parquet filter pushdown converts IN to multiple ORs if the number of values is below a threshold, but the rationale and performance impact are unclear.",
+    "pain_point": "Users don't know how to tune this threshold for optimal performance when dealing with large IN clauses in Parquet.",
+    "expectation": "Understand why OR is preferred over IN in some cases.",
+    "opinions": {
+      "Asif Shahid": "Speculated it's about avoiding Map lookup costs and memory usage.",
+      "Yuming Wang": "Pointed to specific PR discussions clarifying the historical context of Parquet's filter API limits."
+    },
+    "score": {
+      "clarity": 4,
+      "difficulty": 4,
+      "interaction": 4,
+      "total": 12
+    },
+    "summary": "A very technical discussion on the intersection of Spark Catalyst and Parquet's internal filter representation. Tuning this requires understanding how the underlying data source handles large predicates (e.g., dictionary filtering vs. full scan)."
+  }
+]

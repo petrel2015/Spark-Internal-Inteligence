@@ -1,0 +1,356 @@
+{
+  "discuss": [
+    {
+      "thread_id": "<CAB_G8ZsLRHyFHjT5oTV-jvEiWsZ1MFn501u+B8xmBGypiNVbFA@mail.gmail.com>",
+      "subject": "TypeError in spark-pipelines due to GeographyType",
+      "start_date": "2025-10-25T20:02:34+02:00",
+      "message_count": 2,
+      "root": {
+        "id": "<CAB_G8ZsLRHyFHjT5oTV-jvEiWsZ1MFn501u+B8xmBGypiNVbFA@mail.gmail.com>",
+        "from": "Jacek Laskowski <jacek@japila.pl>",
+        "subject": "TypeError in spark-pipelines due to GeographyType",
+        "date": "2025-10-25T20:02:34+02:00",
+        "body": "Hi,\n\nJust FYI that running spark-pipelines in the latest master gives the\nfollowing TypeError:\n\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\n  File \"/Users/jacek/oss/spark/python/pyspark/__init__.py\", line 129, in\n<module>\n    from pyspark.sql import SQLContext, HiveContext  # noqa: F401\n  File \"/Users/jacek/oss/spark/python/pyspark/sql/__init__.py\", line 42, in\n<module>\n    from pyspark.sql.types import Row, VariantVal\n  File \"/Users/jacek/oss/spark/python/pyspark/sql/types.py\", line 531, in\n<module>\n    class GeographyType(SpatialType):\n  File \"/Users/jacek/oss/spark/python/pyspark/sql/types.py\", line 547, in\nGeographyType\n    def __init__(self, srid: int | str):\nTypeError: unsupported operand type(s) for |: 'type' and 'type'\n\nMy Python project defines: `requires-python = \">=3.12\"`\n\nThis happens when I source the virtual env and execute spark-pipelines\nshell.\n\nPySpark uses 3.10+ (python_requires=\">=3.10\"\nin python/packaging/client/setup.py).\n\nCould the problem be the following lines in spark-pipelines?\n\n# Default to standard python3 interpreter unless told otherwise\nif [[ -z \"$PYSPARK_PYTHON\" ]]; then\n  PYSPARK_PYTHON=python3\nfi\n\nOn macos, it gives 3.9.\n\n❯ type python3\npython3 is /usr/bin/python3\n\n❯ python3 --version\nPython 3.9.6\n\nShould I file an issue (against master)?\n\nBTW, I think GeographyType should be defined in __all__\nin pyspark/sql/types.py, shouldn't it?\n\nPozdrawiam,\nJacek Laskowski\n----\n\"The Internals Of\" Online Books <https://books.japila.pl/>\nFollow me on Bluesky <https://bsky.app/profile/books.japila.pl>\n\n<https://twitter.com/jaceklaskowski>",
+        "in_reply_to": null,
+        "references": null,
+        "replies": [
+          {
+            "id": "<CALTMNpCP5maZ-T-4AUjJOXDmipPaeSdpssGj_2tFf8wrdcUWBA@mail.gmail.com>",
+            "from": "Ruifeng Zheng <zrflibra@gmail.com>",
+            "subject": "Re: TypeError in spark-pipelines due to GeographyType",
+            "date": "2025-10-29T15:59:29+08:00",
+            "body": "Hi Jacek,\nIt seems you need to properly set environment variables like\nPYSPARK_PYTHON, PYSPARK_DRIVER_PYTHON\n\n> I think GeographyType should be defined in __all__\nin pyspark/sql/types.py, shouldn't it?\n\nyou are right, both GeographyType and GeometryType should be included in\n__all__.\n\nthanks\n\nOn Sun, Oct 26, 2025 at 2:03 AM Jacek Laskowski <jacek@japila.pl> wrote:\n\n> Hi,\n>\n> Just FYI that running spark-pipelines in the latest master gives the\n> following TypeError:\n>\n> Traceback (most recent call last):\n>   File \"<stdin>\", line 1, in <module>\n>   File \"/Users/jacek/oss/spark/python/pyspark/__init__.py\", line 129, in\n> <module>\n>     from pyspark.sql import SQLContext, HiveContext  # noqa: F401\n>   File \"/Users/jacek/oss/spark/python/pyspark/sql/__init__.py\", line 42,\n> in <module>\n>     from pyspark.sql.types import Row, VariantVal\n>   File \"/Users/jacek/oss/spark/python/pyspark/sql/types.py\", line 531, in\n> <module>\n>     class GeographyType(SpatialType):\n>   File \"/Users/jacek/oss/spark/python/pyspark/sql/types.py\", line 547, in\n> GeographyType\n>     def __init__(self, srid: int | str):\n> TypeError: unsupported operand type(s) for |: 'type' and 'type'\n>\n> My Python project defines: `requires-python = \">=3.12\"`\n>\n> This happens when I source the virtual env and execute spark-pipelines\n> shell.\n>\n> PySpark uses 3.10+ (python_requires=\">=3.10\"\n> in python/packaging/client/setup.py).\n>\n> Could the problem be the following lines in spark-pipelines?\n>\n> # Default to standard python3 interpreter unless told otherwise\n> if [[ -z \"$PYSPARK_PYTHON\" ]]; then\n>   PYSPARK_PYTHON=python3\n> fi\n>\n> On macos, it gives 3.9.\n>\n> ❯ type python3\n> python3 is /usr/bin/python3\n>\n> ❯ python3 --version\n> Python 3.9.6\n>\n> Should I file an issue (against master)?\n>\n> BTW, I think GeographyType should be defined in __all__\n> in pyspark/sql/types.py, shouldn't it?\n>\n> Pozdrawiam,\n> Jacek Laskowski\n> ----\n> \"The Internals Of\" Online Books <https://books.japila.pl/>\n> Follow me on Bluesky <https://bsky.app/profile/books.japila.pl>\n>\n> <https://twitter.com/jaceklaskowski>\n>\n\n\n-- \nRuifeng Zheng\nE-mail: zrflibra@gmail.com",
+            "in_reply_to": "<CAB_G8ZsLRHyFHjT5oTV-jvEiWsZ1MFn501u+B8xmBGypiNVbFA@mail.gmail.com>",
+            "references": "<CAB_G8ZsLRHyFHjT5oTV-jvEiWsZ1MFn501u+B8xmBGypiNVbFA@mail.gmail.com>",
+            "replies": []
+          }
+        ]
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<tencent_1534373D6F2CAB9CFFC87A22A1E63FD87405@qq.com>",
+      "subject": "[DISCUSS] Different output precision of now() in Spark 3.5.1 between Java 8 and Java 21",
+      "start_date": "2025-10-25T01:08:29+08:00",
+      "message_count": 1,
+      "root": {
+        "id": "<tencent_1534373D6F2CAB9CFFC87A22A1E63FD87405@qq.com>",
+        "from": "\"=?utf-8?B?WXUgSG9uZw==?=\" <petrel2015@foxmail.com>",
+        "subject": "[DISCUSS] Different output precision of now() in Spark 3.5.1 between Java 8 and Java 21",
+        "date": "2025-10-25T01:08:29+08:00",
+        "body": "Hi Spark community,\r\n\r\n\r\n\r\n\r\nI recently found a difference in the behavior of the&nbsp;now()&nbsp;function in Spark SQL 3.5.1 when running under different JVM versions (Java 8 vs Java 21).\r\n\r\n\r\n\r\n\r\nBackground:\r\n\r\nIn Spark 3.5.1, the implementation of&nbsp;now()&nbsp;eventually calls&nbsp;Instant.now()&nbsp;in Java.\r\n\r\nHowever, the precision of&nbsp;Instant.now()&nbsp;differs by Java version:\r\n\r\n\r\nJava 8: millisecond precision\r\n\r\n\r\n\r\nJava 21: microsecond precision\r\n\r\n\r\n\r\n\r\n\r\nWhen Spark converts this value into a&nbsp;timestamp&nbsp;and then formats it (via&nbsp;TimestampFormatter),\r\n\r\nthe trailing zeros are trimmed — meaning:\r\n\r\n\r\nOn Java 8, the result shows up to 3 fractional digits (for example, 2025-10-25 13:04:05.123)\r\n\r\n\r\n\r\nOn Java 21, it may show up to 6 fractional digits (for example, 2025-10-25 13:04:05.123456)\r\n\r\n\r\n\r\n\r\n\r\nFrom the source code, I noticed that&nbsp;DefaultTimestampFormatter&nbsp;extends&nbsp;Iso8601TimestampFormatter.\r\n\r\nIt seems that the display behavior is consistent with the ISO-8601 standard, which does not constrain\r\n\r\nthe number of fractional digits to a fixed length. I’m not entirely sure if my understanding is correct,\r\n\r\nso I would appreciate any clarification from the community.\r\n\r\n\r\n\r\n\r\nThis seems consistent with both Java and Spark behavior, as neither explicitly guarantees a fixed number of fractional digits.\r\n\r\nHowever, this difference brings a backward-compatibility issue in our environment.\r\n\r\n\r\n\r\n\r\nProblem:\r\n\r\nIn our platform, some business tables store timestamp values as string columns with a fixed length.\r\n\r\nI’m aware that storing timestamps as strings is not ideal, but due to historical reasons and existing dependencies,\r\n\r\nit’s not something we can easily change at the platform level.\r\n\r\n\r\n\r\n\r\nUpgrading Spark’s JVM from Java 8 to Java 21 will therefore cause these values to exceed the column length limit.\r\n\r\nSince we maintain a shared Spark platform used by many business teams,\r\n\r\nit’s very difficult to coordinate changes to all downstream systems.\r\n\r\n\r\n\r\n\r\nMy Questions and Proposal:\r\n\r\n\r\nIs my understanding correct regarding how Spark 3.5.1 derives its&nbsp;now()&nbsp;precision from the underlying&nbsp;Instant.now()&nbsp;and&nbsp;Iso8601TimestampFormatter?\r\n\r\n\r\n\r\nDoes the Spark community have any plan or discussion to stabilize or unify the precision of&nbsp;now()&nbsp;output across Java versions?\r\n\r\n\r\n\r\nI’m considering adding a new optional configuration to address this issue, for example:\r\n\r\nspark.sql.timestamp.now.compat.java8 = false\r\n\r\nWhen set to false (the default), Spark will keep the current behavior (using the JVM’s native Instant.now() precision).\r\n\r\nWhen set to true, Spark will apply a controlled formatter that limits the fractional part of seconds to at most three digits,\r\n\r\neffectively simulating Java 8’s millisecond precision for display and string conversion.\r\n\r\nThis approach would not affect computation precision internally — only the formatted string representation —\r\n\r\nand could help users maintain backward compatibility with older data models.\r\n\r\n\r\n\r\n\r\n\r\nIf the community thinks this direction makes sense, I would be happy to open a JIRA and submit a PR for review.\r\n\r\nI’d also like to hear whether there are existing conventions or related discussions about timestamp precision compatibility\r\n\r\nthat I should take into account before implementing this.\r\n\r\n\r\n\r\n\r\nThanks for your time and insights.\r\n\r\n\r\n\r\n\r\nBest regards,\r\n\r\nYu Hong",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<F320C09D-E214-4FEE-A5AE-1DFAB81D3A75@gmail.com>",
+      "subject": "Reopen the stale PR  for SPARK-46912",
+      "start_date": "2025-10-20T00:47:15+05:00",
+      "message_count": 1,
+      "root": {
+        "id": "<F320C09D-E214-4FEE-A5AE-1DFAB81D3A75@gmail.com>",
+        "from": "Melton Smith <ravenglc1@gmail.com>",
+        "subject": "Reopen the stale PR  for SPARK-46912",
+        "date": "2025-10-20T00:47:15+05:00",
+        "body": "Dear Spark Devs,\n\nIn June, I opened PR https://github.com/apache/spark/pull/51314 \nrelated  to the issue: https://issues.apache.org/jira/browse/SPARK-46912\n\nSome time has passed, and now, it’s marked as stale.\nCould you please remove this tag and reopen the PR?\n\nI’d really appreciate if somebody takes a look at it for review.\n\nThanks,\nMel\n\n\n> On 24 Jul 2025, at 23:47, Melton Smith <ravenglc1@gmail.com> wrote:\n> \n> Last month I’ve opened a PR, which fixes StandAlone mode bug in environments (detailed description inside the PR)\n> \n> Is anybody interested in reviewing and merging it?\n> \n> Regards,\n> Melton",
+        "in_reply_to": "<BA71E079-994E-4900-AA7C-626B461FC1F8@gmail.com>",
+        "references": "<57DE0A81-4127-4117-9E91-DDC980CB032E@gmail.com>\n <BA71E079-994E-4900-AA7C-626B461FC1F8@gmail.com>",
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>",
+      "subject": "Question: Unexpected behavior and potential correctness issue when\n using groupBy and count_distinct + percentile",
+      "start_date": "2025-10-16T18:06:29+08:00",
+      "message_count": 4,
+      "root": {
+        "id": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>",
+        "from": "FengYu Cao <camper.xlii@gmail.com>",
+        "subject": "Question: Unexpected behavior and potential correctness issue when\n using groupBy and count_distinct + percentile",
+        "date": "2025-10-16T18:06:29+08:00",
+        "body": "Hi Spark community,\n\nI encountered an unexpected behavior when using `percentile()` and\n`count_distinct()` in a simple groupBy aggregation, and I’d like to confirm\nwhether this is expected behavior or a potential correctness issue.\n\nEnvironment:\n- Apache Spark 3.5.7\n- Data source: Parquet\n- Schema:\n  root\n   |-- user_id: long (nullable = true)\n   |-- duration: long (nullable = true)\n   |-- date: date (nullable = true)\n\nReproduction code:\n------------------------------------------------------------\ndf.groupBy(\"date\").agg(\n    F.count_distinct('user_id').alias('n_users'),\n    F.percentile('duration', 0.95).alias('p95')\n).explain()\n------------------------------------------------------------\n\nPhysical plan:\n------------------------------------------------------------\n== Physical Plan ==\nAdaptiveSparkPlan isFinalPlan=false\n+- ObjectHashAggregate(keys=[date#561],\nfunctions=[percentile(duration#559L, 0.95, 1, 0, 0, false), count(distinct\nuser_id#558L)])\n   +- Exchange hashpartitioning(date#561, 200), ENSURE_REQUIREMENTS,\n[plan_id=717]\n      +- ObjectHashAggregate(keys=[date#561],\nfunctions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false),\npartial_count(distinct user_id#558L)])\n         +- ObjectHashAggregate(keys=[date#561, user_id#558L],\nfunctions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n            +- Exchange hashpartitioning(date#561, user_id#558L, 200),\nENSURE_REQUIREMENTS, [plan_id=713]\n               +- ObjectHashAggregate(keys=[date#561, user_id#558L],\nfunctions=[partial_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n                  +- FileScan parquet [user_id#558L,duration#559L,date#561]\n...\n------------------------------------------------------------\n\nQuestion:\nWhy is there an additional `ObjectHashAggregate` on `(date, user_id)` when\nthe logical aggregation only groups by `date`?\n\nFor the case of groupBy(\"date\") + count_distinct + sum, it seems fine.\nBut for percentile, could this lead to a potential correctness issue?\n(when [date,\nuser_id] is not unique)\n\n--\n*camper42 (曹丰宇)*\nDouban, Inc.",
+        "in_reply_to": null,
+        "references": null,
+        "replies": [
+          {
+            "id": "<CABfDjEDPuT7147VcyHCD_VxOp4bJGPupV9WiUJoi0Ve0TEsLSg@mail.gmail.com>",
+            "from": "Herman van Hovell <herman@databricks.com.INVALID>",
+            "subject": "Re: Question: Unexpected behavior and potential correctness issue\n when using groupBy and count_distinct + percentile",
+            "date": "2025-10-16T12:56:12-04:00",
+            "body": "Hi FengYu,\n\nThis is because of count_distinct() on user id. We rewrite this into a\nmulti-step aggregation where we first aggregate per on the grouping keys\n(date) and the distinct values (user_id), and then we aggregate on the\ngrouping keys only.  The first step is needed to get the distinct values.\n\nI hope this helps.\n\nCheers,\nHerman\n\nOn Thu, Oct 16, 2025 at 6:08 AM FengYu Cao <camper.xlii@gmail.com> wrote:\n\n> Hi Spark community,\n>\n> I encountered an unexpected behavior when using `percentile()` and\n> `count_distinct()` in a simple groupBy aggregation, and I’d like to confirm\n> whether this is expected behavior or a potential correctness issue.\n>\n> Environment:\n> - Apache Spark 3.5.7\n> - Data source: Parquet\n> - Schema:\n>   root\n>    |-- user_id: long (nullable = true)\n>    |-- duration: long (nullable = true)\n>    |-- date: date (nullable = true)\n>\n> Reproduction code:\n> ------------------------------------------------------------\n> df.groupBy(\"date\").agg(\n>     F.count_distinct('user_id').alias('n_users'),\n>     F.percentile('duration', 0.95).alias('p95')\n> ).explain()\n> ------------------------------------------------------------\n>\n> Physical plan:\n> ------------------------------------------------------------\n> == Physical Plan ==\n> AdaptiveSparkPlan isFinalPlan=false\n> +- ObjectHashAggregate(keys=[date#561],\n> functions=[percentile(duration#559L, 0.95, 1, 0, 0, false), count(distinct\n> user_id#558L)])\n>    +- Exchange hashpartitioning(date#561, 200), ENSURE_REQUIREMENTS,\n> [plan_id=717]\n>       +- ObjectHashAggregate(keys=[date#561],\n> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false),\n> partial_count(distinct user_id#558L)])\n>          +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>             +- Exchange hashpartitioning(date#561, user_id#558L, 200),\n> ENSURE_REQUIREMENTS, [plan_id=713]\n>                +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n> functions=[partial_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>                   +- FileScan parquet\n> [user_id#558L,duration#559L,date#561] ...\n> ------------------------------------------------------------\n>\n> Question:\n> Why is there an additional `ObjectHashAggregate` on `(date, user_id)` when\n> the logical aggregation only groups by `date`?\n>\n> For the case of groupBy(\"date\") + count_distinct + sum, it seems fine.\n> But for percentile, could this lead to a potential correctness issue?\n> (when [date, user_id] is not unique)\n>\n> --\n> *camper42 (曹丰宇)*\n> Douban, Inc.\n>",
+            "in_reply_to": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>",
+            "references": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>",
+            "replies": [
+              {
+                "id": "<CAFgOEN6efNCvBCMekY3nkFxGtrHKkOdzzaSe4kJK2gZ45=NDrA@mail.gmail.com>",
+                "from": "FengYu Cao <camper.xlii@gmail.com>",
+                "subject": "Re: Question: Unexpected behavior and potential correctness issue\n when using groupBy and count_distinct + percentile",
+                "date": "2025-10-17T12:23:43+08:00",
+                "body": "did a quick check, the result is correct.\n\nIn our case, (date, user_id) is unique, seems that it’s just our code that\ncaused an unexpected and poor-performing query plan, no potential\ncorrectness issue,\nthanks for help.\n\n---\ndf = spark.createDataFrame([\n    (\"2025-01-01\", 1, 0),\n    (\"2025-01-01\", 1, 1),\n    (\"2025-01-01\", 2, 2),\n    (\"2025-01-01\", 2, 3),\n    (\"2025-01-01\", 3, 4),\n    (\"2025-01-01\", 3, 5),\n    (\"2025-01-01\", 4, 6),\n    (\"2025-01-01\", 4, 7),\n    (\"2025-01-01\", 5, 8),\n    (\"2025-01-01\", 5, 9),\n\n    (\"2025-01-02\", 1, 0),\n    (\"2025-01-02\", 1, 1),\n    (\"2025-01-02\", 2, 2),\n    (\"2025-01-02\", 2, 3),\n    (\"2025-01-02\", 3, 4),\n    (\"2025-01-02\", 3, 5),\n    (\"2025-01-02\", 4, 6),\n    (\"2025-01-02\", 4, 7),\n    (\"2025-01-02\", 5, 8),\n    (\"2025-01-02\", 5, 9),\n\n    (\"2025-01-03\", 1, 0),\n    (\"2025-01-03\", 1, 1),\n    (\"2025-01-03\", 2, 2),\n    (\"2025-01-03\", 2, 3),\n    (\"2025-01-03\", 3, 4),\n    (\"2025-01-03\", 3, 5),\n    (\"2025-01-03\", 4, 6),\n    (\"2025-01-03\", 4, 7),\n    (\"2025-01-03\", 5, 8),\n    (\"2025-01-03\", 5, 9),\n], schema=\"date string, user_id long, duration long\")\n---\n\n---\ndf.groupBy(\"date\").agg(\n    F.count_distinct('user_id').alias('n_users'),\n    F.sum(\"duration\")\n).toPandas()\n\ndate n_users sum(duration)\n0 2025-01-03 5 45\n1 2025-01-01 5 45\n2 2025-01-02 5 45\n---\n\nHerman van Hovell <herman@databricks.com> 于2025年10月17日周五 00:56写道：\n\n> Hi FengYu,\n>\n> This is because of count_distinct() on user id. We rewrite this into a\n> multi-step aggregation where we first aggregate per on the grouping keys\n> (date) and the distinct values (user_id), and then we aggregate on the\n> grouping keys only.  The first step is needed to get the distinct values.\n>\n> I hope this helps.\n>\n> Cheers,\n> Herman\n>\n> On Thu, Oct 16, 2025 at 6:08 AM FengYu Cao <camper.xlii@gmail.com> wrote:\n>\n>> Hi Spark community,\n>>\n>> I encountered an unexpected behavior when using `percentile()` and\n>> `count_distinct()` in a simple groupBy aggregation, and I’d like to confirm\n>> whether this is expected behavior or a potential correctness issue.\n>>\n>> Environment:\n>> - Apache Spark 3.5.7\n>> - Data source: Parquet\n>> - Schema:\n>>   root\n>>    |-- user_id: long (nullable = true)\n>>    |-- duration: long (nullable = true)\n>>    |-- date: date (nullable = true)\n>>\n>> Reproduction code:\n>> ------------------------------------------------------------\n>> df.groupBy(\"date\").agg(\n>>     F.count_distinct('user_id').alias('n_users'),\n>>     F.percentile('duration', 0.95).alias('p95')\n>> ).explain()\n>> ------------------------------------------------------------\n>>\n>> Physical plan:\n>> ------------------------------------------------------------\n>> == Physical Plan ==\n>> AdaptiveSparkPlan isFinalPlan=false\n>> +- ObjectHashAggregate(keys=[date#561],\n>> functions=[percentile(duration#559L, 0.95, 1, 0, 0, false), count(distinct\n>> user_id#558L)])\n>>    +- Exchange hashpartitioning(date#561, 200), ENSURE_REQUIREMENTS,\n>> [plan_id=717]\n>>       +- ObjectHashAggregate(keys=[date#561],\n>> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false),\n>> partial_count(distinct user_id#558L)])\n>>          +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n>> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>>             +- Exchange hashpartitioning(date#561, user_id#558L, 200),\n>> ENSURE_REQUIREMENTS, [plan_id=713]\n>>                +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n>> functions=[partial_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>>                   +- FileScan parquet\n>> [user_id#558L,duration#559L,date#561] ...\n>> ------------------------------------------------------------\n>>\n>> Question:\n>> Why is there an additional `ObjectHashAggregate` on `(date, user_id)`\n>> when the logical aggregation only groups by `date`?\n>>\n>> For the case of groupBy(\"date\") + count_distinct + sum, it seems fine.\n>> But for percentile, could this lead to a potential correctness issue?\n>> (when [date, user_id] is not unique)\n>>\n>> --\n>> *camper42 (曹丰宇)*\n>> Douban, Inc.\n>>\n>\n\n-- \n*camper42 (曹丰宇)*\nDouban, Inc.",
+                "in_reply_to": "<CABfDjEDPuT7147VcyHCD_VxOp4bJGPupV9WiUJoi0Ve0TEsLSg@mail.gmail.com>",
+                "references": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>\n <CABfDjEDPuT7147VcyHCD_VxOp4bJGPupV9WiUJoi0Ve0TEsLSg@mail.gmail.com>",
+                "replies": [
+                  {
+                    "id": "<CAFgOEN5bNKUo8wFS7GSFM-rDNG9uRuTMQdUSZ7Cr4RVTVvXkew@mail.gmail.com>",
+                    "from": "FengYu Cao <camper.xlii@gmail.com>",
+                    "subject": "Re: Question: Unexpected behavior and potential correctness issue\n when using groupBy and count_distinct + percentile",
+                    "date": "2025-10-17T12:29:28+08:00",
+                    "body": "df.groupBy(\"date\").agg(\n    F.count_distinct('user_id').alias('n_users'),\n    F.percentile(\"duration\", [0.5, 1])\n).toPandas()\n\ndate n_users percentile(duration, array(0.5, 1), 1)\n0 2025-01-03 5 [4.5, 9.0]\n1 2025-01-01 5 [4.5, 9.0]\n2 2025-01-02 5 [4.5, 9.0]\n\ndf.groupBy(\"date\").agg(\n    F.percentile(\"duration\", [0.5, 1])\n).toPandas()\n\ndate percentile(duration, array(0.5, 1), 1)\n0 2025-01-01 [4.5, 9.0]\n1 2025-01-02 [4.5, 9.0]\n2 2025-01-03 [4.5, 9.0]\n\nFengYu Cao <camper.xlii@gmail.com> 于2025年10月17日周五 12:23写道：\n\n> did a quick check, the result is correct.\n>\n> In our case, (date, user_id) is unique, seems that it’s just our code that\n> caused an unexpected and poor-performing query plan, no potential\n> correctness issue,\n> thanks for help.\n>\n> ---\n> df = spark.createDataFrame([\n>     (\"2025-01-01\", 1, 0),\n>     (\"2025-01-01\", 1, 1),\n>     (\"2025-01-01\", 2, 2),\n>     (\"2025-01-01\", 2, 3),\n>     (\"2025-01-01\", 3, 4),\n>     (\"2025-01-01\", 3, 5),\n>     (\"2025-01-01\", 4, 6),\n>     (\"2025-01-01\", 4, 7),\n>     (\"2025-01-01\", 5, 8),\n>     (\"2025-01-01\", 5, 9),\n>\n>     (\"2025-01-02\", 1, 0),\n>     (\"2025-01-02\", 1, 1),\n>     (\"2025-01-02\", 2, 2),\n>     (\"2025-01-02\", 2, 3),\n>     (\"2025-01-02\", 3, 4),\n>     (\"2025-01-02\", 3, 5),\n>     (\"2025-01-02\", 4, 6),\n>     (\"2025-01-02\", 4, 7),\n>     (\"2025-01-02\", 5, 8),\n>     (\"2025-01-02\", 5, 9),\n>\n>     (\"2025-01-03\", 1, 0),\n>     (\"2025-01-03\", 1, 1),\n>     (\"2025-01-03\", 2, 2),\n>     (\"2025-01-03\", 2, 3),\n>     (\"2025-01-03\", 3, 4),\n>     (\"2025-01-03\", 3, 5),\n>     (\"2025-01-03\", 4, 6),\n>     (\"2025-01-03\", 4, 7),\n>     (\"2025-01-03\", 5, 8),\n>     (\"2025-01-03\", 5, 9),\n> ], schema=\"date string, user_id long, duration long\")\n> ---\n>\n> ---\n> df.groupBy(\"date\").agg(\n>     F.count_distinct('user_id').alias('n_users'),\n>     F.sum(\"duration\")\n> ).toPandas()\n>\n> date n_users sum(duration)\n> 0 2025-01-03 5 45\n> 1 2025-01-01 5 45\n> 2 2025-01-02 5 45\n> ---\n>\n> Herman van Hovell <herman@databricks.com> 于2025年10月17日周五 00:56写道：\n>\n>> Hi FengYu,\n>>\n>> This is because of count_distinct() on user id. We rewrite this into a\n>> multi-step aggregation where we first aggregate per on the grouping keys\n>> (date) and the distinct values (user_id), and then we aggregate on the\n>> grouping keys only.  The first step is needed to get the distinct values.\n>>\n>> I hope this helps.\n>>\n>> Cheers,\n>> Herman\n>>\n>> On Thu, Oct 16, 2025 at 6:08 AM FengYu Cao <camper.xlii@gmail.com> wrote:\n>>\n>>> Hi Spark community,\n>>>\n>>> I encountered an unexpected behavior when using `percentile()` and\n>>> `count_distinct()` in a simple groupBy aggregation, and I’d like to confirm\n>>> whether this is expected behavior or a potential correctness issue.\n>>>\n>>> Environment:\n>>> - Apache Spark 3.5.7\n>>> - Data source: Parquet\n>>> - Schema:\n>>>   root\n>>>    |-- user_id: long (nullable = true)\n>>>    |-- duration: long (nullable = true)\n>>>    |-- date: date (nullable = true)\n>>>\n>>> Reproduction code:\n>>> ------------------------------------------------------------\n>>> df.groupBy(\"date\").agg(\n>>>     F.count_distinct('user_id').alias('n_users'),\n>>>     F.percentile('duration', 0.95).alias('p95')\n>>> ).explain()\n>>> ------------------------------------------------------------\n>>>\n>>> Physical plan:\n>>> ------------------------------------------------------------\n>>> == Physical Plan ==\n>>> AdaptiveSparkPlan isFinalPlan=false\n>>> +- ObjectHashAggregate(keys=[date#561],\n>>> functions=[percentile(duration#559L, 0.95, 1, 0, 0, false), count(distinct\n>>> user_id#558L)])\n>>>    +- Exchange hashpartitioning(date#561, 200), ENSURE_REQUIREMENTS,\n>>> [plan_id=717]\n>>>       +- ObjectHashAggregate(keys=[date#561],\n>>> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false),\n>>> partial_count(distinct user_id#558L)])\n>>>          +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n>>> functions=[merge_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>>>             +- Exchange hashpartitioning(date#561, user_id#558L, 200),\n>>> ENSURE_REQUIREMENTS, [plan_id=713]\n>>>                +- ObjectHashAggregate(keys=[date#561, user_id#558L],\n>>> functions=[partial_percentile(duration#559L, 0.95, 1, 0, 0, false)])\n>>>                   +- FileScan parquet\n>>> [user_id#558L,duration#559L,date#561] ...\n>>> ------------------------------------------------------------\n>>>\n>>> Question:\n>>> Why is there an additional `ObjectHashAggregate` on `(date, user_id)`\n>>> when the logical aggregation only groups by `date`?\n>>>\n>>> For the case of groupBy(\"date\") + count_distinct + sum, it seems fine.\n>>> But for percentile, could this lead to a potential correctness issue?\n>>> (when [date, user_id] is not unique)\n>>>\n>>> --\n>>> *camper42 (曹丰宇)*\n>>> Douban, Inc.\n>>>\n>>\n>\n> --\n> *camper42 (曹丰宇)*\n> Douban, Inc.\n>\n\n\n-- \n*camper42 (曹丰宇)*\nDouban, Inc.\n\nMobile: +86 15691996359\nE-mail:  camper.xlii@gmail.com",
+                    "in_reply_to": "<CAFgOEN6efNCvBCMekY3nkFxGtrHKkOdzzaSe4kJK2gZ45=NDrA@mail.gmail.com>",
+                    "references": "<CAFgOEN6i+qTLUDa4CyECfWZ3R-4HHRqAvXgnd=1KoLuquaJD7A@mail.gmail.com>\n <CABfDjEDPuT7147VcyHCD_VxOp4bJGPupV9WiUJoi0Ve0TEsLSg@mail.gmail.com> <CAFgOEN6efNCvBCMekY3nkFxGtrHKkOdzzaSe4kJK2gZ45=NDrA@mail.gmail.com>",
+                    "replies": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CA+REd4PeuLwEjm8AaTy3YDyQU8wrbd7-eAeFS6XBc98GWDUfBw@mail.gmail.com>",
+      "subject": "Re: [DISCUSS] Enhance JSON Parsing to Support Standard Compliance",
+      "start_date": "2025-10-13T14:31:39+08:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CA+REd4PeuLwEjm8AaTy3YDyQU8wrbd7-eAeFS6XBc98GWDUfBw@mail.gmail.com>",
+        "from": "Philo <feilong.he.mail@gmail.com>",
+        "subject": "Re: [DISCUSS] Enhance JSON Parsing to Support Standard Compliance",
+        "date": "2025-10-13T14:31:39+08:00",
+        "body": "Here are some findings that I believe violate the JSON standard. With the\nnewly introduced configuration, we expect the JSON parsing behavior to\nalign with the standard. There may still be additional uncovered cases.\n\n1. Single Quotes for String Data:\nSpark allows the use of single quotes to represent string data through the\n`allowSingleQuotes` option (default: true). When enabled, single quotes are\npermitted. However, according to the JSON standard, single quotes are not\nvalid and should be treated as malformed JSON.\n\n2. JSON Data Containing Non-escaped Characters:\nAs per https://www.rfc-editor.org/rfc/rfc8259, certain characters must be\nescaped in JSON, including quotation marks, reverse solidus, and control\ncharacters (U+0000 to U+001F). For instance, Spark allows non-escaped \"\\n\"\nin JSON string data, but this violates the JSON standard and should be\nconsidered broken data. For more detailed discussion, see this reference:\nhttps://lemire.me/blog/2025/07/04/just-say-no-to-broken-json/.\n\nThanks,\nPhilo\n\nOn Thu, Sep 4, 2025 at 6:33 PM Wenchen Fan <cloud0fan@gmail.com> wrote:\n\n> Do we have a list of behaviors we want to change after enabling the new\n> config?\n>\n> On Thu, Sep 4, 2025 at 5:38 PM Philo <philo@apache.org> wrote:\n>\n>> Hi all,\n>>\n>> I am writing to initiate a discussion on enhancing Spark JSON parsing to\n>> support standard compliance.\n>>\n>> ## Motivation\n>> In the current version of Spark, the JSON parser is designed to be\n>> compatible with Hive, which means that some behaviors may not adhere\n>> strictly to standard JSON compliance. For instance, it permits the use\n>> of single quotes in JSON parsing for functions such as get_json_object\n>>  and json_tuple. Additionally, there are other instances where the\n>> behavior diverges from standard JSON practices.\n>>\n>> ## Proposal\n>> To address these inconsistencies, we propose introducing a configuration\n>> option that allows users to choose between legacy behavior and standard\n>> compliance. This approach ensures that existing workflows remain unaffected\n>> while providing the flexibility to adopt standard JSON practices if desired.\n>>\n>> See JIRA: https://issues.apache.org/jira/browse/SPARK-53281\n>>\n>> Thanks,\n>> Philo\n>>\n>",
+        "in_reply_to": "<CAEQOfPN1yJ=zVmv9GhimPvm4Nwc=PwYgYozyg1ex_0wJRNebuQ@mail.gmail.com>",
+        "references": "<CA+REd4P=Aq0AyT66tY415wG0D-kdPDHhBMOgHp8YxB5r_zcgfA@mail.gmail.com>\n <CAEQOfPN1yJ=zVmv9GhimPvm4Nwc=PwYgYozyg1ex_0wJRNebuQ@mail.gmail.com>",
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAMqn=e8BHyvminvOLPNLGrvjWuLx=v6YOxv1sOYwP2f-RWwWkw@mail.gmail.com>",
+      "subject": "Re: [Spark SQL] Improving query Performance by increasing\n spark.sql.parquet.pushdown.inFilterThreshold config",
+      "start_date": "2025-10-01T11:38:59-07:00",
+      "message_count": 3,
+      "root": {
+        "id": "<CAMqn=e8BHyvminvOLPNLGrvjWuLx=v6YOxv1sOYwP2f-RWwWkw@mail.gmail.com>",
+        "from": "Asif Shahid <asif.shahid@gmail.com>",
+        "subject": "Re: [Spark SQL] Improving query Performance by increasing\n spark.sql.parquet.pushdown.inFilterThreshold config",
+        "date": "2025-10-01T11:38:59-07:00",
+        "body": "My take:\nOR will result in  lining of the OR conditions , which means no Map lookup.\nSo I suppose it would save on memory associated with Map creations ( & that\ntoo I suppose per partition )  and the lookup costs, when implemented using\nIN\nMay be there are other reasons which I do not know...\n\nRegards\nAsif\n\nOn Tue, Sep 30, 2025 at 1:37 PM Yian Liou <yliou@berkeley.edu.invalid>\nwrote:\n\n> Hi everyone,\n>\n> I am looking to increasing the value of the config\n> spark.sql.parquet.pushdown.inFilterThreshold to boost performance for some\n> queries I am looking at. While looking at the implementation in the Spark\n> Repo at\n> https://github.com/apache/spark/blob/master/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/parquet/ParquetFilters.scala#L798 with\n> the following code snippet\n>\n> case sources.In(name, values) if pushDownInFilterThreshold > 0 &&\n> values.nonEmpty &&\n>           canMakeFilterOn(name, values.head) =>\n>         val fieldType = nameToParquetField(name).fieldType\n>         val fieldNames = nameToParquetField(name).fieldNames\n>         if (values.length <= pushDownInFilterThreshold) {\n>           values.distinct.flatMap { v =>\n>             makeEq.lift(fieldType).map(_(fieldNames, v))\n>           }.reduceLeftOption(FilterApi.or)\n>         } else if (canPartialPushDownConjuncts) {\n>           if (values.contains(null)) {\n>             Seq(makeEq.lift(fieldType).map(_(fieldNames, null)),\n>               makeInPredicate.lift(fieldType).map(_(fieldNames,\n> values.filter(_ != null)))\n>             ).flatten.reduceLeftOption(FilterApi.or)\n>           } else {\n>             makeInPredicate.lift(fieldType).map(_(fieldNames, values))\n>           }\n>         } else {\n>           None\n>         }\n>\n>  I see that when the number of items is less than or equal to\n> spark.sql.parquet.pushdown.inFilterThreshold in ParquetFilters.scala,\n> Parquet pushes ORs rather than an IN predicate. What are the advantages of\n> doing so?\n>\n> Best Regards,\n> Yian\n>",
+        "in_reply_to": "<CAH2zZbbFQw828ej8ZHeMT46np9gG+aCL9g0s64DpFWbRGSBwCg@mail.gmail.com>",
+        "references": "<CAH2zZbbFQw828ej8ZHeMT46np9gG+aCL9g0s64DpFWbRGSBwCg@mail.gmail.com>",
+        "replies": [
+          {
+            "id": "<CAGUyL8ixrk6WaRW01TG6zzs0orriwQLScEocOrEq+qoK6w9TmA@mail.gmail.com>",
+            "from": "=?UTF-8?Q?=C3=81ngel_=C3=81lvarez_Pascua?= <angel.alvarez.pascua@gmail.com>",
+            "subject": "Re: [Spark SQL] Improving query Performance by increasing\n spark.sql.parquet.pushdown.inFilterThreshold config",
+            "date": "2025-10-01T21:34:00+02:00",
+            "body": "The IN clause tends to have a limit (depends on the datasource). I'm not\nthat sure with concatenating ORs.\n\nEl mié, 1 oct 2025, 20:48, Asif Shahid <asif.shahid@gmail.com> escribió:\n\n> My take:\n> OR will result in  lining of the OR conditions , which means no Map\n> lookup. So I suppose it would save on memory associated with Map creations\n> ( & that too I suppose per partition )  and the lookup costs, when\n> implemented using IN\n> May be there are other reasons which I do not know...\n>\n> Regards\n> Asif\n>\n> On Tue, Sep 30, 2025 at 1:37 PM Yian Liou <yliou@berkeley.edu.invalid>\n> wrote:\n>\n>> Hi everyone,\n>>\n>> I am looking to increasing the value of the config\n>> spark.sql.parquet.pushdown.inFilterThreshold to boost performance for some\n>> queries I am looking at. While looking at the implementation in the Spark\n>> Repo at\n>> https://github.com/apache/spark/blob/master/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/parquet/ParquetFilters.scala#L798 with\n>> the following code snippet\n>>\n>> case sources.In(name, values) if pushDownInFilterThreshold > 0 &&\n>> values.nonEmpty &&\n>>           canMakeFilterOn(name, values.head) =>\n>>         val fieldType = nameToParquetField(name).fieldType\n>>         val fieldNames = nameToParquetField(name).fieldNames\n>>         if (values.length <= pushDownInFilterThreshold) {\n>>           values.distinct.flatMap { v =>\n>>             makeEq.lift(fieldType).map(_(fieldNames, v))\n>>           }.reduceLeftOption(FilterApi.or)\n>>         } else if (canPartialPushDownConjuncts) {\n>>           if (values.contains(null)) {\n>>             Seq(makeEq.lift(fieldType).map(_(fieldNames, null)),\n>>               makeInPredicate.lift(fieldType).map(_(fieldNames,\n>> values.filter(_ != null)))\n>>             ).flatten.reduceLeftOption(FilterApi.or)\n>>           } else {\n>>             makeInPredicate.lift(fieldType).map(_(fieldNames, values))\n>>           }\n>>         } else {\n>>           None\n>>         }\n>>\n>>  I see that when the number of items is less than or equal to\n>> spark.sql.parquet.pushdown.inFilterThreshold in ParquetFilters.scala,\n>> Parquet pushes ORs rather than an IN predicate. What are the advantages of\n>> doing so?\n>>\n>> Best Regards,\n>> Yian\n>>\n>",
+            "in_reply_to": "<CAMqn=e8BHyvminvOLPNLGrvjWuLx=v6YOxv1sOYwP2f-RWwWkw@mail.gmail.com>",
+            "references": "<CAH2zZbbFQw828ej8ZHeMT46np9gG+aCL9g0s64DpFWbRGSBwCg@mail.gmail.com>\n <CAMqn=e8BHyvminvOLPNLGrvjWuLx=v6YOxv1sOYwP2f-RWwWkw@mail.gmail.com>",
+            "replies": [
+              {
+                "id": "<CACL7Bs4f40xiMMo-B2ZBp-2RHeWmne4mxP5-bxnjGX=dTGbUJg@mail.gmail.com>",
+                "from": "Yuming Wang <yumwang@apache.org>",
+                "subject": "Re: [Spark SQL] Improving query Performance by increasing\n spark.sql.parquet.pushdown.inFilterThreshold config",
+                "date": "2025-10-02T22:22:11+08:00",
+                "body": "Please read this comment:\nhttps://github.com/apache/spark/pull/36696#pullrequestreview-987216872\n\nOn Thu, Oct 2, 2025 at 3:56 AM Ángel Álvarez Pascua <\nangel.alvarez.pascua@gmail.com> wrote:\n\n> The IN clause tends to have a limit (depends on the datasource). I'm not\n> that sure with concatenating ORs.\n>\n> El mié, 1 oct 2025, 20:48, Asif Shahid <asif.shahid@gmail.com> escribió:\n>\n>> My take:\n>> OR will result in  lining of the OR conditions , which means no Map\n>> lookup. So I suppose it would save on memory associated with Map creations\n>> ( & that too I suppose per partition )  and the lookup costs, when\n>> implemented using IN\n>> May be there are other reasons which I do not know...\n>>\n>> Regards\n>> Asif\n>>\n>> On Tue, Sep 30, 2025 at 1:37 PM Yian Liou <yliou@berkeley.edu.invalid>\n>> wrote:\n>>\n>>> Hi everyone,\n>>>\n>>> I am looking to increasing the value of the config\n>>> spark.sql.parquet.pushdown.inFilterThreshold to boost performance for some\n>>> queries I am looking at. While looking at the implementation in the Spark\n>>> Repo at\n>>> https://github.com/apache/spark/blob/master/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/parquet/ParquetFilters.scala#L798 with\n>>> the following code snippet\n>>>\n>>> case sources.In(name, values) if pushDownInFilterThreshold > 0 &&\n>>> values.nonEmpty &&\n>>>           canMakeFilterOn(name, values.head) =>\n>>>         val fieldType = nameToParquetField(name).fieldType\n>>>         val fieldNames = nameToParquetField(name).fieldNames\n>>>         if (values.length <= pushDownInFilterThreshold) {\n>>>           values.distinct.flatMap { v =>\n>>>             makeEq.lift(fieldType).map(_(fieldNames, v))\n>>>           }.reduceLeftOption(FilterApi.or)\n>>>         } else if (canPartialPushDownConjuncts) {\n>>>           if (values.contains(null)) {\n>>>             Seq(makeEq.lift(fieldType).map(_(fieldNames, null)),\n>>>               makeInPredicate.lift(fieldType).map(_(fieldNames,\n>>> values.filter(_ != null)))\n>>>             ).flatten.reduceLeftOption(FilterApi.or)\n>>>           } else {\n>>>             makeInPredicate.lift(fieldType).map(_(fieldNames, values))\n>>>           }\n>>>         } else {\n>>>           None\n>>>         }\n>>>\n>>>  I see that when the number of items is less than or equal to\n>>> spark.sql.parquet.pushdown.inFilterThreshold in ParquetFilters.scala,\n>>> Parquet pushes ORs rather than an IN predicate. What are the advantages of\n>>> doing so?\n>>>\n>>> Best Regards,\n>>> Yian\n>>>\n>>",
+                "in_reply_to": "<CAGUyL8ixrk6WaRW01TG6zzs0orriwQLScEocOrEq+qoK6w9TmA@mail.gmail.com>",
+                "references": "<CAH2zZbbFQw828ej8ZHeMT46np9gG+aCL9g0s64DpFWbRGSBwCg@mail.gmail.com>\n <CAMqn=e8BHyvminvOLPNLGrvjWuLx=v6YOxv1sOYwP2f-RWwWkw@mail.gmail.com> <CAGUyL8ixrk6WaRW01TG6zzs0orriwQLScEocOrEq+qoK6w9TmA@mail.gmail.com>",
+                "replies": []
+              }
+            ]
+          }
+        ]
+      },
+      "doc_links": [],
+      "doc_content": ""
+    }
+  ],
+  "release": [
+    {
+      "thread_id": "<CAMFhwAbXhUoUhAumjufkUTt+oCBRSzdtspTbf25oTz6wFVQunQ@mail.gmail.com>",
+      "subject": "[ANNOUNCE] Announcing Apache Spark 4.1.0-preview3",
+      "start_date": "2025-10-30T13:28:49+09:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CAMFhwAbXhUoUhAumjufkUTt+oCBRSzdtspTbf25oTz6wFVQunQ@mail.gmail.com>",
+        "from": "Hyukjin Kwon <gurwls223@apache.org>",
+        "subject": "[ANNOUNCE] Announcing Apache Spark 4.1.0-preview3",
+        "date": "2025-10-30T13:28:49+09:00",
+        "body": "Hi all,\n\nTo enable wide-scale community testing of the upcoming Spark 4.1.0 release,\nthe Apache Spark community has posted a Spark 4.1.0-preview3 release\n<https://dist.apache.org/repos/dist/release/spark/spark-4.1.0-preview3>.\nThis preview is not a stable release in terms of either API or\nfunctionality,\nbut it is meant to give the community early access to try the code that will\nbecome Spark 4.1.0. If you would like to test the release, please download\n<https://dist.apache.org/repos/dist/release/spark/spark-4.1.0-preview3> it,\nand send feedback using either mailing lists\n<https://spark.apache.org/community.html> or JIRA\n<https://issues.apache.org/jira/browse/SPARK/?selectedTab=com.atlassian.jira.jira-projects-plugin:summary-panel>.\nThe documentation is available at the link\n<https://spark.apache.org/docs/4.1.0-preview3/>.\n\nWe’d like to thank our contributors and users for their contributions and\nearly feedback to this release. This release would not have been possible\nwithout you.\nTo download Spark 4.1.0-preview3, head over to the download page:\nhttps://dist.apache.org/repos/dist/release/spark/spark-4.1.0-preview3/\n\nTo view the documentation:\nhttps://spark.apache.org/docs/preview/",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAEiUzWdM5xRqgMk9cbqtzSCbFc3FW=1Lr0Hzh+oZet2PPczdvQ@mail.gmail.com>",
+      "subject": "Re: [ANNOUNCE] Apache Spark 3.5.7 released",
+      "start_date": "2025-10-02T18:56:44+02:00",
+      "message_count": 2,
+      "root": {
+        "id": "<CAEiUzWdM5xRqgMk9cbqtzSCbFc3FW=1Lr0Hzh+oZet2PPczdvQ@mail.gmail.com>",
+        "from": "Peter Toth <peter.toth@gmail.com>",
+        "subject": "Re: [ANNOUNCE] Apache Spark 3.5.7 released",
+        "date": "2025-10-02T18:56:44+02:00",
+        "body": "Hi Kevin,\n\nPublishing to conda forge doesn't seem to be part of our release process:\nhttps://spark.apache.org/release-process.html, so I have no idea how\nprevious releases ended up there.\nDongjoon, as the release manager or 3.5.5 and 4.0.1, did you manually\npublish the files there?\n\nPeter\n\n\nOn Mon, Sep 29, 2025 at 8:04 PM Appel, Kevin <kevin.appel@bofa.com> wrote:\n\n> Thank you Peter, is this also going to get published to conda forge?\n>\n> The 3.5.6 and 3.5.7 isn’t published there, the last was 3.5.5 and then\n> 4.0.1 is there\n>\n> https://anaconda.org/conda-forge/pyspark/files\n>\n>\n>\n>\n>\n> *From:* Peter Toth <peter.toth@gmail.com>\n> *Sent:* Thursday, September 25, 2025 2:37 PM\n> *To:* dev <dev@spark.apache.org>; user <user@spark.apache.org>\n> *Subject:* [ANNOUNCE] Apache Spark 3.5.7 released\n>\n>\n>\n> We are happy to announce the availability of Apache Spark 3.5.7!\n>\n> Spark 3.5.7 is the seventh maintenance release containing security and\n> correctness fixes. This release is based on the branch-3.5 maintenance\n> branch of Spark. We strongly recommend all 3.5 users to upgrade to this\n> stable release.\n>\n>\n> To download Spark 3.5.7, head over to the download page:\n> https://spark.apache.org/downloads.html\n> <https://urldefense.com/v3/__https:/spark.apache.org/downloads.html__;!!I2XIyG2ANlwasLbx!WpuHLRaC3Dc5vbDq7QzxTFeFNVNgj8sCIop-_R0UhTUEk6lIT2pCli3QBP2Anc0_vZRca3WdlvkbbfQ4MX5r$>\n>\n> To view the release notes:\n> https://spark.apache.org/releases/spark-release-3-5-7.html\n> <https://urldefense.com/v3/__https:/spark.apache.org/releases/spark-release-3-5-7.html__;!!I2XIyG2ANlwasLbx!WpuHLRaC3Dc5vbDq7QzxTFeFNVNgj8sCIop-_R0UhTUEk6lIT2pCli3QBP2Anc0_vZRca3WdlvkbbRqzVEFe$>\n>\n> We would like to acknowledge all community members for contributing to\n> this release. This release would not have been possible without you.\n>\n>\n>\n> Peter\n>\n>\n> ------------------------------\n> This message, and any attachment(s), is for the intended recipient(s)\n> only, may contain information that is privileged, confidential and/or\n> proprietary and subject to important terms and conditions available at\n> http://www.bankofamerica.com/electronic-disclaimer. If you are not the\n> intended recipient, please delete this message. For more information about\n> how Bank of America protects your privacy, including specific rights that\n> may apply, please visit the following pages:\n> https://business.bofa.com/en-us/content/global-privacy-notices.html\n> (which includes global privacy notices) and\n> https://www.bankofamerica.com/security-center/privacy-overview/ (which\n> includes US State specific privacy notices such as the\n> http://www.bankofamerica.com/ccpa-notice).\n>",
+        "in_reply_to": "<9d304e5ed65f4f69abf7c65661db63a9@bofa.com>",
+        "references": "<CAEiUzWdzTTFE8V_vD9Pb=twcHVQ9tyQntr1L1RqKOtQC353GBQ@mail.gmail.com>\n <9d304e5ed65f4f69abf7c65661db63a9@bofa.com>",
+        "replies": [
+          {
+            "id": "<CAFu6yH0A1De2YfdpArrYaG6r65i5-CCBgCOC7FNbb5VBJrqQag@mail.gmail.com>",
+            "from": "Dongjoon Hyun <dongjoon.hyun@gmail.com>",
+            "subject": "Re: [ANNOUNCE] Apache Spark 3.5.7 released",
+            "date": "2025-10-02T10:43:41-07:00",
+            "body": "No, I didn't, Peter.\n\nAFAIK, Conda community is responsible  for it because it's not one of ASF\ndistribution channels.\n\nDongjoon.\n\nOn Thu, Oct 2, 2025 at 09:56 Peter Toth <peter.toth@gmail.com> wrote:\n\n> Hi Kevin,\n>\n> Publishing to conda forge doesn't seem to be part of our release process:\n> https://spark.apache.org/release-process.html, so I have no idea how\n> previous releases ended up there.\n> Dongjoon, as the release manager or 3.5.5 and 4.0.1, did you manually\n> publish the files there?\n>\n> Peter\n>\n>\n> On Mon, Sep 29, 2025 at 8:04 PM Appel, Kevin <kevin.appel@bofa.com> wrote:\n>\n>> Thank you Peter, is this also going to get published to conda forge?\n>>\n>> The 3.5.6 and 3.5.7 isn’t published there, the last was 3.5.5 and then\n>> 4.0.1 is there\n>>\n>> https://anaconda.org/conda-forge/pyspark/files\n>>\n>>\n>>\n>>\n>>\n>> *From:* Peter Toth <peter.toth@gmail.com>\n>> *Sent:* Thursday, September 25, 2025 2:37 PM\n>> *To:* dev <dev@spark.apache.org>; user <user@spark.apache.org>\n>> *Subject:* [ANNOUNCE] Apache Spark 3.5.7 released\n>>\n>>\n>>\n>> We are happy to announce the availability of Apache Spark 3.5.7!\n>>\n>> Spark 3.5.7 is the seventh maintenance release containing security and\n>> correctness fixes. This release is based on the branch-3.5 maintenance\n>> branch of Spark. We strongly recommend all 3.5 users to upgrade to this\n>> stable release.\n>>\n>>\n>> To download Spark 3.5.7, head over to the download page:\n>> https://spark.apache.org/downloads.html\n>> <https://urldefense.com/v3/__https:/spark.apache.org/downloads.html__;!!I2XIyG2ANlwasLbx!WpuHLRaC3Dc5vbDq7QzxTFeFNVNgj8sCIop-_R0UhTUEk6lIT2pCli3QBP2Anc0_vZRca3WdlvkbbfQ4MX5r$>\n>>\n>> To view the release notes:\n>> https://spark.apache.org/releases/spark-release-3-5-7.html\n>> <https://urldefense.com/v3/__https:/spark.apache.org/releases/spark-release-3-5-7.html__;!!I2XIyG2ANlwasLbx!WpuHLRaC3Dc5vbDq7QzxTFeFNVNgj8sCIop-_R0UhTUEk6lIT2pCli3QBP2Anc0_vZRca3WdlvkbbRqzVEFe$>\n>>\n>> We would like to acknowledge all community members for contributing to\n>> this release. This release would not have been possible without you.\n>>\n>>\n>>\n>> Peter\n>>\n>>\n>> ------------------------------\n>> This message, and any attachment(s), is for the intended recipient(s)\n>> only, may contain information that is privileged, confidential and/or\n>> proprietary and subject to important terms and conditions available at\n>> http://www.bankofamerica.com/electronic-disclaimer. If you are not the\n>> intended recipient, please delete this message. For more information about\n>> how Bank of America protects your privacy, including specific rights that\n>> may apply, please visit the following pages:\n>> https://business.bofa.com/en-us/content/global-privacy-notices.html\n>> (which includes global privacy notices) and\n>> https://www.bankofamerica.com/security-center/privacy-overview/ (which\n>> includes US State specific privacy notices such as the\n>> http://www.bankofamerica.com/ccpa-notice).\n>>\n>",
+            "in_reply_to": "<CAEiUzWdM5xRqgMk9cbqtzSCbFc3FW=1Lr0Hzh+oZet2PPczdvQ@mail.gmail.com>",
+            "references": "<CAEiUzWdzTTFE8V_vD9Pb=twcHVQ9tyQntr1L1RqKOtQC353GBQ@mail.gmail.com>\n <9d304e5ed65f4f69abf7c65661db63a9@bofa.com> <CAEiUzWdM5xRqgMk9cbqtzSCbFc3FW=1Lr0Hzh+oZet2PPczdvQ@mail.gmail.com>",
+            "replies": []
+          }
+        ]
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>",
+      "subject": "[ANNOUNCE] Apache Spark Kubernetes Operator 0.5.0 released",
+      "start_date": "2025-10-02T09:19:54-07:00",
+      "message_count": 4,
+      "root": {
+        "id": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>",
+        "from": "Dongjoon Hyun <dongjoon.hyun@gmail.com>",
+        "subject": "[ANNOUNCE] Apache Spark Kubernetes Operator 0.5.0 released",
+        "date": "2025-10-02T09:19:54-07:00",
+        "body": "Hi All.\n\nWe are happy to announce the availability of Apache Spark Kubernetes\nOperator 0.5.0!\n\n- Website\n  * https://s.apache.org/spark-kubernetes-operator/\n\n- Artifact Hub\n  *\nhttps://artifacthub.io/packages/helm/spark-kubernetes-operator/spark-kubernetes-operator/\n\n- Release Note\n  * https://github.com/apache/spark-kubernetes-operator/releases/tag/0.5.0\n  * https://s.apache.org/spark-kubernetes-operator-0.5.0\n\n- Published Docker Image\n  * apache/spark-kubernetes-operator:0.5.0\n\nCheers,\nDongjoon.",
+        "in_reply_to": null,
+        "references": null,
+        "replies": [
+          {
+            "id": "<CAEiUzWcpHYRPiVSffjFLi9Q7TzF4SWd-GxXdT0+bjN0Rn9XcRg@mail.gmail.com>",
+            "from": "Peter Toth <peter.toth@gmail.com>",
+            "subject": "Re: [ANNOUNCE] Apache Spark Kubernetes Operator 0.5.0 released",
+            "date": "2025-10-02T18:45:12+02:00",
+            "body": "Thank you Dongjoon for driving this!\n\nOn Thu, Oct 2, 2025 at 6:28 PM Dongjoon Hyun <dongjoon.hyun@gmail.com>\nwrote:\n\n> Hi All.\n>\n> We are happy to announce the availability of Apache Spark Kubernetes\n> Operator 0.5.0!\n>\n> - Website\n>   * https://s.apache.org/spark-kubernetes-operator/\n>\n> - Artifact Hub\n>   *\n> https://artifacthub.io/packages/helm/spark-kubernetes-operator/spark-kubernetes-operator/\n>\n> - Release Note\n>   * https://github.com/apache/spark-kubernetes-operator/releases/tag/0.5.0\n>   * https://s.apache.org/spark-kubernetes-operator-0.5.0\n>\n> - Published Docker Image\n>   * apache/spark-kubernetes-operator:0.5.0\n>\n> Cheers,\n> Dongjoon.\n>",
+            "in_reply_to": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>",
+            "references": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>",
+            "replies": [
+              {
+                "id": "<C6361DDF-811B-42A9-A817-B7F10CBD87FB@apple.com>",
+                "from": "kazuyuki tanimura <ktanimura@apple.com.INVALID>",
+                "subject": "Re: [ANNOUNCE] Apache Spark Kubernetes Operator 0.5.0 released",
+                "date": "2025-10-03T09:21:54-07:00",
+                "body": "Thank you Dongjoon!\n\nKazu\n\n\n> On Oct 2, 2025, at 9:45 AM, Peter Toth <peter.toth@gmail.com> wrote:\n> \n> Thank you Dongjoon for driving this!\n> \n> On Thu, Oct 2, 2025 at 6:28 PM Dongjoon Hyun <dongjoon.hyun@gmail.com <mailto:dongjoon.hyun@gmail.com>> wrote:\n>> Hi All.\n>> \n>> We are happy to announce the availability of Apache Spark Kubernetes Operator 0.5.0!\n>> \n>> - Website\n>>   * https://s.apache.org/spark-kubernetes-operator/\n>> \n>> - Artifact Hub\n>>   * https://artifacthub.io/packages/helm/spark-kubernetes-operator/spark-kubernetes-operator/\n>> \n>> - Release Note\n>>   * https://github.com/apache/spark-kubernetes-operator/releases/tag/0.5.0\n>>   * https://s.apache.org/spark-kubernetes-operator-0.5.0\n>> \n>> - Published Docker Image\n>>   * apache/spark-kubernetes-operator:0.5.0\n>> \n>> Cheers,\n>> Dongjoon.",
+                "in_reply_to": "<CAEiUzWcpHYRPiVSffjFLi9Q7TzF4SWd-GxXdT0+bjN0Rn9XcRg@mail.gmail.com>",
+                "references": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>\n <CAEiUzWcpHYRPiVSffjFLi9Q7TzF4SWd-GxXdT0+bjN0Rn9XcRg@mail.gmail.com>",
+                "replies": [
+                  {
+                    "id": "<CAK7+HpMhsm0_HzW8=c3xay9hHXyKYGz7qkScstiQH0js8ddHNg@mail.gmail.com>",
+                    "from": "Zhou Jiang <zhou.c.jiang@gmail.com>",
+                    "subject": "Re: [ANNOUNCE] Apache Spark Kubernetes Operator 0.5.0 released",
+                    "date": "2025-10-03T13:03:35-07:00",
+                    "body": "Thanks Dongjoon!\n\nOn Fri, Oct 3, 2025 at 9:31 AM kazuyuki tanimura\n<ktanimura@apple.com.invalid> wrote:\n\n> Thank you Dongjoon!\n>\n> Kazu\n>\n>\n> On Oct 2, 2025, at 9:45 AM, Peter Toth <peter.toth@gmail.com> wrote:\n>\n> Thank you Dongjoon for driving this!\n>\n> On Thu, Oct 2, 2025 at 6:28 PM Dongjoon Hyun <dongjoon.hyun@gmail.com>\n> wrote:\n>\n>> Hi All.\n>>\n>> We are happy to announce the availability of Apache Spark Kubernetes\n>> Operator 0.5.0!\n>>\n>> - Website\n>>   * https://s.apache.org/spark-kubernetes-operator/\n>>\n>> - Artifact Hub\n>>   *\n>> https://artifacthub.io/packages/helm/spark-kubernetes-operator/spark-kubernetes-operator/\n>>\n>> - Release Note\n>>   *\n>> https://github.com/apache/spark-kubernetes-operator/releases/tag/0.5.0\n>>   * https://s.apache.org/spark-kubernetes-operator-0.5.0\n>>\n>> - Published Docker Image\n>>   * apache/spark-kubernetes-operator:0.5.0\n>>\n>> Cheers,\n>> Dongjoon.\n>>\n>\n>\n\n-- \n*Zhou JIANG*",
+                    "in_reply_to": "<C6361DDF-811B-42A9-A817-B7F10CBD87FB@apple.com>",
+                    "references": "<CAFu6yH1xSu1fHqpobaFqB7AKtmbiQxcFGzTB075X1veT8Yetvw@mail.gmail.com>\n <CAEiUzWcpHYRPiVSffjFLi9Q7TzF4SWd-GxXdT0+bjN0Rn9XcRg@mail.gmail.com> <C6361DDF-811B-42A9-A817-B7F10CBD87FB@apple.com>",
+                    "replies": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAFu6yH1fb_BD8fmZ3zj_5j35XT77SbY93Qo3QjK5wVR_AKPr5g@mail.gmail.com>",
+      "subject": "[ANNOUNCE] Apache Spark Connect Swift Client 0.4.0 released",
+      "start_date": "2025-10-01T09:58:33-07:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CAFu6yH1fb_BD8fmZ3zj_5j35XT77SbY93Qo3QjK5wVR_AKPr5g@mail.gmail.com>",
+        "from": "Dongjoon Hyun <dongjoon.hyun@gmail.com>",
+        "subject": "[ANNOUNCE] Apache Spark Connect Swift Client 0.4.0 released",
+        "date": "2025-10-01T09:58:33-07:00",
+        "body": "Hi All.\n\nWe are happy to announce the availability of Apache Spark Connect Swift\nClient 0.4.0!\n\nWebsite\n  - https://apache.github.io/spark-connect-swift/\n\nRelease Note\n  - https://github.com/apache/spark-connect-swift/releases/tag/0.4.0\n  - https://s.apache.org/spark-connect-swift-0.4.0\n\nSwift Package Index\n  - https://swiftpackageindex.com/apache/spark-connect-swift\n\nCheers,\nDongjoon.",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    }
+  ],
+  "spip": [
+    {
+      "thread_id": "<CAB-_f0i_T3CEjZifH3aCtmCL3V+t9V7c0Z-cUf3bTF3HYnYjAA@mail.gmail.com>",
+      "subject": "[DISCUSS] SPIP: The metrics & semantic modeling in Spark",
+      "start_date": "2025-10-31T14:29:51-07:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CAB-_f0i_T3CEjZifH3aCtmCL3V+t9V7c0Z-cUf3bTF3HYnYjAA@mail.gmail.com>",
+        "from": "Linhong Liu <linhong.liu@databricks.com.INVALID>",
+        "subject": "[DISCUSS] SPIP: The metrics & semantic modeling in Spark",
+        "date": "2025-10-31T14:29:51-07:00",
+        "body": "Hi all,\n\nI would like to propose introducing \"The metrics & semantic modeling in\nSpark\".\n\nThis feature enables defining business metrics once and reusing them across\nany breakdown, ensuring consistent outcomes and bridging the semantic gap\nbetween business logic and data schemas to help LLMs generate more precise\nresults.\n\nLooking forward to your feedback!\n\nJIRA: SPARK-54119 <https://issues.apache.org/jira/browse/SPARK-54119>\nSPIP docs:\nhttps://docs.google.com/document/d/1xVTLijvDTJ90lZ_ujwzf9HvBJgWg0mY6cYM44Fcghl0/edit?tab=t.0#heading=h.4iogryr5qznc\n<https://docs.google.com/document/d/1xVTLijvDTJ90lZ_ujwzf9HvBJgWg0mY6cYM44Fcghl0/edit?tab=t.0#heading=h.4iogryr5qznc>\n\nThanks,\nLinhong",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [
+        "https://docs.google.com/document/d/1xVTLijvDTJ90lZ_ujwzf9HvBJgWg0mY6cYM44Fcghl0"
+      ],
+      "doc_content": ""
+    }
+  ],
+  "others": [
+    {
+      "thread_id": "<CAFu6yH1V6JEu=iRDKiQVYNTT4nVhdqEo2ZppOtNo-j74djrfBg@mail.gmail.com>",
+      "subject": "[FYI] Apache Spark 4.1 Soft Feature Freeze (2025-11-01)",
+      "start_date": "2025-10-31T08:56:48-07:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CAFu6yH1V6JEu=iRDKiQVYNTT4nVhdqEo2ZppOtNo-j74djrfBg@mail.gmail.com>",
+        "from": "Dongjoon Hyun <dongjoon@apache.org>",
+        "subject": "[FYI] Apache Spark 4.1 Soft Feature Freeze (2025-11-01)",
+        "date": "2025-10-31T08:56:48-07:00",
+        "body": "Hi, All.\n\nHope you have a fun and safe Halloween evening!\n\nAccording to the Apache Spark versioning policy, `branch-4.1` will be\ncreated on November 1st as a way of soft feature freeze and a ramping down\nstage in order to stabilize new features.\n\nhttps://spark.apache.org/versioning-policy.html\n\nNote that it's a soft feature freeze. The Apache Spark PMC member can\nbackport features from `master` to `branch-4.1` until November 15th.\n\nLastly, Apache Spark 4.1.0-preview3 is provided to you to help your\ncommunity evaluation, please try to use 4.1.0-preview3 and report us any\nissues.\n\nThank you,\nDongjoon Hyun.",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    },
+    {
+      "thread_id": "<CAFu6yH2yVJnREnTVyDwQrD6j_NHBBA-SKgs0h_1Y22a3YeH_-w@mail.gmail.com>",
+      "subject": "[FYI] Apache Spark 4.1 Release Schedule",
+      "start_date": "2025-10-16T13:20:53-07:00",
+      "message_count": 1,
+      "root": {
+        "id": "<CAFu6yH2yVJnREnTVyDwQrD6j_NHBBA-SKgs0h_1Y22a3YeH_-w@mail.gmail.com>",
+        "from": "Dongjoon Hyun <dongjoon.hyun@gmail.com>",
+        "subject": "[FYI] Apache Spark 4.1 Release Schedule",
+        "date": "2025-10-16T13:20:53-07:00",
+        "body": "Hi all,\n\nFYI, according to the community versioning policy, here is the planned\nschedule for Apache Spark 4.1 (and its subprojects):\n1. Release 4.1.0-preview3\n2. Create branch-4.1 for soft feature freeze — 2025-11-01\n3. Begin QA period — 2025-11-15\n4. Start RC1 — 2025-11-23\n\nPlease stay tuned for upcoming tasks:\n• SPARK-51166: Prepare Apache Spark 4.1.0\n• SPARK-53726: Release Spark Kubernetes Operator 0.6.0\n• SPARK-53749: Release Spark Connect Swift Client 0.5.0\n\nBest regards,\nDongjoon Hyun",
+        "in_reply_to": null,
+        "references": null,
+        "replies": []
+      },
+      "doc_links": [],
+      "doc_content": ""
+    }
+  ]
+}
