@@ -1,34 +1,35 @@
-# Gemini AI 辅助系统设计 (Spark核心内参)
+# Spark 核心内参 · AI Skill 设计说明
 
-本项目深度集成 Gemini AI 能力，通过一系列专门化的 **Skills (智能体技能)** 实现从海量邮件列表到高质量技术月刊的自动化生产。
+本项目通过一个符合 [Agent Skills 规范](https://agentskills.io/specification) 的单一 Skill，实现从 Spark 邮件列表 mbox 到高质量技术月刊的自动化生产。可在任何支持该规范的 Agent（ZCode、Claude Code 等）中运行。
 
-## 🤖 智能体团队 (AI Agents Role)
+## 🤖 Skill 结构
 
-系统采用多角色协作模式，模拟报社编辑部的运作流程：
+整个工作流封装在一个 skill 中，采用 progressive disclosure 分层加载：
 
-| 角色 | Skill 名称 | 职责描述 |
+| 文件 | 职责 |
+| :--- | :--- |
+| `skills/spark-internal-intelligence/SKILL.md` | 主编排：四阶段流水线（解析 → 分类 → 摘要 → 合成） |
+| `skills/.../references/classification-rules.md` | Phase 2 线程分类规则（Release/Discuss/SPIP/Others 优先级与匹配条件） |
+| `skills/.../references/summary-schemas.md` | Phase 3 三类摘要的输出字段、评分表、WebFetch 指引 |
+| `skills/.../references/report-template.md` | Phase 4 最终 Markdown 报告模板（含字面量示例） |
+
+## 🛠 四阶段流水线 (Pipeline)
+
+| Phase | 做什么 | 产物 |
 | :--- | :--- | :--- |
-| **主编** | `spark-internal-inteligence-chief-editor` | 负责整体调度，指挥策划编辑准备数据，指挥责任编辑完成写作。 |
-| **策划编辑** | `spark-internal-inteligence-planning-editor` | 负责数据预处理：解析 mbox、按月组织目录、调用分类器。 |
-| **分类专家** | `thread-classifier` | 将邮件线程自动归类为：`SPIP` (提案)、`Release` (发布)、`Discuss` (讨论)。 |
-| **摘要专家** | `spip/release/discuss-summarizer` | 针对不同类型的线程，提取核心矛盾、技术要点、专家观点及重要性评分。 |
-| **责任编辑** | `spark-internal-inteligence-responsible-editor` | 整合各类摘要，进行中文润色、排版，生成最终的《Spark核心内参》Markdown 报告。 |
+| **1. Parse & Filter** | 运行 `main.py` 线程化 mbox 并过滤噪音 | `step1_threads.json`, `step2_threads_filtered.json` |
+| **2. Classify** | 运行 `src/classify_tool.py` 按 Release/Discuss/SPIP/Others 归桶 | `step3_threads_classified.json` |
+| **3. Summarize** | 三类摘要独立生成（可并行 subagent） | `step4-6_*_summary.json` |
+| **4. Compose** | 合成中文 Markdown 月刊，融入架构师视角的编者按 | `Spark_Internal_Inteligence_<YYYY>_<MM>.md` |
 
-## 🛠 AI 工作流 (Pipeline)
+每个 phase 产出的 JSON 都落盘到 `output/<YYYY-MM>/`，处理过程透明、可断点续跑。
 
-1.  **数据注入**：手动或自动将 `.mbox` 文件放入 `input/`。
-2.  **结构化**：`mbox_parser.py` 将邮件聚合成 JSON 线程。
-3.  **分类路由**：`thread-classifier` 根据内容判定线程属性。
-4.  **深度摘要**：针对不同类别调用特定 Prompt 模板进行信息浓缩。
-5.  **月刊合成**：按照日期结构汇聚当月所有高价值信息。
+## 🚀 使用方式
 
-## 📂 技能定义目录
+在任意支持 Agent Skills 规范的 Agent 中：
 
-所有 AI 逻辑和 Prompt 存储在：
-- `.gemini/skills/`: 包含各角色的 `SKILL.md` 指令说明。
+```
+/spark-internal-intelligence 处理 2026-7
+```
 
-## 🚀 使用目标
-
-通过 `gemini-cli` 激活相应技能，实现：
-- `activate_skill spark-internal-inteligence-chief-editor`
-- 自动化生成 2025-12 或 2026-01 的《Spark核心内参》。
+Skill 会自动判断是从头跑全流程，还是从某个已存在的 `stepN_*.json` 断点续跑。
