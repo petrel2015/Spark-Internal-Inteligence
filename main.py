@@ -3,21 +3,37 @@ import json
 from pathlib import Path
 from src.mbox_parser import parse_mbox_to_threads
 from src.topic_filter import filter_threads
+from src.fetch_mbox import fetch_mbox
 
 @click.command()
 @click.option('--mbox', 'mbox_path', 
               type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True), 
-              required=True, 
-              help='Path to the mbox file.')
+              help='Path to an existing mbox file. Use this for a file you already have.')
+@click.option('--month', 'month',
+              type=str,
+              help='Download the Spark dev-list mbox for this month, then process it. '
+                   'Format: YYYY-M or YYYY-MM (e.g. 2026-7, 2025-10). '
+                   'Fetched from the Apache Pony Mail archive.')
 @click.option('--output-dir', 'output_base', 
               type=click.Path(file_okay=False, dir_okay=True, writable=True), 
               default='output',
               help='Base directory for output files.')
-def main(mbox_path, output_base):
+def main(mbox_path, month, output_base):
     """
-    A command-line tool to parse an mbox file, filter conversation
-    threads, and save the output as a JSON file in a date-based directory.
+    Parse an mbox file, filter conversation threads, and save the output as
+    JSON in a date-based directory.
+
+    Either --mbox (use an existing file) or --month (download from Apache) must
+    be provided. --month is the automation-friendly path: it fetches the latest
+    archive straight from lists.apache.org so you don't need a browser.
     """
+    # Resolve the mbox source: download if --month, else use --mbox.
+    if month:
+        mbox_path = str(fetch_mbox(month, Path("input")))
+    elif not mbox_path:
+        click.echo("Error: provide either --mbox <path> or --month <YYYY-M>.")
+        raise click.Abort()
+
     click.echo(f"Processing mbox file: {mbox_path}")
     
     # --- 1. Parsing ---
