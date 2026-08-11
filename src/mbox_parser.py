@@ -1,3 +1,4 @@
+import codecs
 import mailbox
 import email
 from email.header import decode_header
@@ -28,18 +29,34 @@ def get_email_body(msg):
             body = ""
     return body.strip()
 
-def decode_subject(header):
-    """Decodes email subject header to a string."""
+def _decode_header_value(header):
+    """Decode any email header value (From/Subject/In-Reply-To/References)
+    into a plain str.
+
+    Handles None, str, bytes, and email.header.Header objects. Header objects
+    arise for some encoded/malformed headers and break json.dump if left
+    undecoded (Object of type Header is not JSON serializable); this helper
+    also turns encoded words like =?utf-8?B?WXUgSG9uZw==?= into readable text.
+    """
     if header is None:
         return ""
-    decoded_parts = decode_header(header)
-    subject = ""
-    for part, charset in decoded_parts:
+    if isinstance(header, bytes):
+        # decode_header expects str; bytes headers are ASCII Message-IDs etc.
+        header = header.decode('ascii', errors='replace')
+    decoded = ""
+    for part, charset in decode_header(header):
         if isinstance(part, bytes):
-            subject += part.decode(charset or 'utf-8', errors='replace')
+            # Fall back to utf-8 for charset names Python doesn't know
+            # (e.g. 'unknown-8bit', which otherwise raises LookupError).
+            if charset:
+                try:
+                    codecs.lookup(charset)
+                except LookupError:
+                    charset = 'utf-8'
+            decoded += part.decode(charset or 'utf-8', errors='replace')
         else:
-            subject += str(part)
-    return subject
+            decoded += str(part)
+    return decoded
 
 def simplify_message(msg, msg_id):
     """Converts an email.message.Message to a simplified dictionary."""
@@ -51,12 +68,12 @@ def simplify_message(msg, msg_id):
 
     return {
         "id": msg_id,
-        "from": msg.get("From", ""),
-        "subject": decode_subject(msg.get("Subject", "")),
+        "from": _decode_header_value(msg.get("From")),
+        "subject": _decode_header_value(msg.get("Subject")),
         "date": dt.isoformat() if dt else None,
         "body": get_email_body(msg),
-        "in_reply_to": msg.get("In-Reply-To"),
-        "references": msg.get("References"),
+        "in_reply_to": _decode_header_value(msg.get("In-Reply-To")) or None,
+        "references": _decode_header_value(msg.get("References")) or None,
         "replies": []
     }
 
